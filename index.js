@@ -1,15 +1,13 @@
 const Discord = require(`discord.js`);
-const mysql   = require("mysql");
+const mysql   = require("mysql2");
 require('dotenv').config();
 const moment  = require("moment");
 const client  = new Discord.Client();
 const price   = process.env.PRICE;
 const guildid = process.env.GUILD_ID;
 const prefix  = process.env.PREFIX;
+const MainTeextChannelID = process.env.MAIN_CHANNEL_ID;//can ve deleted at next commits
 moment.locale("ru");
-// const server_name = 'KABO?';
-// const voiceNow = new Set();
-// const daily = new Set();
 const voice = { };
 let pinganswers = ["отвали от меня!","ты тупой?","ты идиот!","я вырежу тебе все органы!","ты не видишь то что я занята?","при первой же возможности я тебя забаню!","ты меня злишь!"]
 const pool = mysql.createPool({
@@ -17,21 +15,22 @@ const pool = mysql.createPool({
   user: process.env.DB_USER,
   password:  process.env.DB_PASSWORD,
   database:  process.env.DB_NAME,
-  port: process.env.DB_PORT
+  port: process.env.DB_PORT,
+  connectionLimit : 1000
 });
 
-pool.connect(err => {
-        if (err) throw err;
-  console.log("Сonnected to database")
-})
-
+pool.getConnection(function(err) {//check for database connection
+	if (err){
+		console.log("cannot connect to database, check out your .env config file");
+		throw err; // not connected!
+	} 
+});
 // FUNCTIONS
 
 const random = function(min, max) {
-    var rand = min + Math.random() * (max + 1 - min);
-    rand = Math.floor(rand);
-    return rand;
-  }
+	return Math.floor(min + Math.random() * (max + 1 - min));
+}
+
 const error = function(desc) {
 	return new Discord.RichEmbed().setColor("RED").setDescription(":x: "+desc);
 }
@@ -40,7 +39,6 @@ const clear = function(str) {
     return str.replace(/(['`', "`"])/g, "\\$1")
 }
 // FUNCTIONS
-
 client.on('ready', () => {
 	console.log("Ready");
 	client.generateInvite().then(i => console.log(i));
@@ -60,15 +58,16 @@ client.on('ready', () => {
     }; setInterval(randomStatus, 60000)
 
 	pool.query(`SELECT * FROM users`, (err, rows) => {
+		if(!rows) return;
 		rows.forEach(row => {
 			if(!row) return;
 			if(row.private === null) return;
 			console.log(row);
-			let roles = JSON.parse(row.private);
+			let roles = JSON.parse(JSON.stringify(row.private));
 			let date = roles.role.to;
 			let nowd = Date.now();
 			if(date - nowd < 0) { //Проверка на активную личную роль
-				client.channels.get('563733138715443240').send("Ваша личная роль исчерпана"); //тут придется поправить под себя
+				client.channels.get(MainTeextChannelID).send("Ваша личная роль исчерпана"); //тут придется поправить под себя
 				client.guilds.get(guildid).members.get(row.id).removeRole(roles.role.id)
 			}
 		})
@@ -79,7 +78,7 @@ client.on('ready', () => {
                 rows.forEach(row => {
                         if(!row) return;
                         if(row.private === null) return;
-                        let roles = JSON.parse(row.private);
+                        let roles = JSON.parse(JSON.stringify(row.private));
 			if(roles.role.active === 'false') return;
                         let date = roles.role.to;
                         let nowd = Date.now();
@@ -136,6 +135,8 @@ client.on('message', message => {
 })
 
 client.on('message', message => {
+	if (message.content.indexOf("<@!566415015519846422>") >= 0)
+		message.reply(pinganswers[Math.floor(Math.random() * (pinganswers.length))]);//
 	const args = message.content.slice(prefix.length).trim().split(/ +/g);
 	const command = args.shift().toLowerCase();
 
@@ -231,34 +232,33 @@ client.on('message', message => {
 		})
 	}
 
-	if (message.content.indexOf("<@566415015519846422>")>=0){
-		message.channel.send(pinganswers[Math.floor(Math.random() * (pinganswers.length))]);//
-	  }
+
 
 	if(command === 'профиль') {
-	let ids;
-						    let member;
-						    ids = message.mentions.members.first()
-						    if (ids) {
-							    member = ids.user.id;
-						    }
-						    if (!ids) {
-							    if(args[1]) { member = args[1] } else { member = args[0]; }
-						    }
-	    					   if(!args[0]) {
-							   member = message.author.id;
-						   }
-	//can somebody remove this comment when we release that?
-	//if(client.users.get(member).bot) return message.channel.send(error("Пользователь не должен быть ботом"));
+		let ids;
+		let member;
+		ids = message.mentions.members.first()
+		if (ids) {
+			member = ids.user.id;
+		}
+		if (!ids) {
+			if(args[1]) { member = args[1] } else { member = args[0]; }
+		}
+			if(!args[0]) {
+			member = message.author.id;
+		}
+		//can somebody remove this comment when we release that?
+		//if(client.users.get(member).bot) return message.channel.send(error("Пользователь не должен быть ботом"));
 
 		pool.query(`SELECT * FROM users WHERE id = ${member}`, (err, rows) => {
 			if(!rows[0]) return;
-			let time_m = rows[0].voicem;
-			let time_h = rows[0].voiceh;
-			if(time_m < 9) time_m = '0'+time_m; //tvorim dich
-			if(time_h < 9) time_h = '0'+time_h; //tvorim dich
+			
+			let time_m = (rows[0].voicem == null)? 0 :rows[0].voicem;
+			let time_h = (rows[0].voiceh == null)? 0 :rows[0].voiceh;
+			if(time_m < 9) time_m = '0'+time_m; //tvorim dich //WTF is that? i will fix this crap at next commits 
+			if(time_h < 9) time_h = '0'+time_h; //tvorim dich //legacy code
 			let time = `${time_h} ч. ${time_m} мин.`; //tvorim dich
-			let uses = JSON.parse(rows[0].uses); //command uses [json sheme]
+			let uses = JSON.parse(JSON.stringify(rows[0].uses)); //command uses [json sheme]
 			let status = client.users.get(member).presence.status; //game
 			if(status == 'online') status = 'В сети';
 			if(status == 'idle') status = 'Не активен';
@@ -281,7 +281,7 @@ client.on('message', message => {
 Лизнули: ${uses.lick}
 Выпил кофе: ${uses.coffee}
 Грустил: ${uses.sad}
-Занимались сексом: ${uses.sex}\`\`\``) //почему мне так смешно
+Занимались сексом: ${uses.sex}\`\`\``) 
 			.addField("** **", `💡 **Статус:** ${status}\n🕛 **Зашел на сервер:** ${moment(message.guild.members.get(rows[0].id).joinedAt).fromNow()}\n🎤 **Пробыл в войсе:** ${time}\n💭**Написал Сообщений:** ${rows[0].messages}\n`)
 			.addField("ℹ Личный Статус", '```'+rows[0].description+'```')
 			.setColor("#36393F")
@@ -290,6 +290,7 @@ client.on('message', message => {
 
 		})
 	}
+
 	if(command === 'топ') {
 		pool.query(`SELECT * FROM users ORDER BY money DESC LIMIT 10`, (err, rows) => {
                         const embed = new Discord.RichEmbed();
@@ -319,9 +320,9 @@ client.on('message', message => {
 				gifted = arr[gifted]; //I think I'm doing something wrong >_>
 				pool.query(`UPDATE users SET gifts = ${rows[0].gifts - 1} WHERE id = '${message.author.id}'`);
 				let i = JSON.parse(rows[0].inventory);
-				let p3 = i.private_3 + 1; //private role for 3 days, fuck
-				let p5 = i.private_5 + 1; //private role for 5 days, fuck
-				let p7 = i.private_7 + 1; //private role for 7 days, fuck
+				let p3 = i.private_3 + 1; //private role for 3 days, 
+				let p5 = i.private_5 + 1; //private role for 5 days, 
+				let p7 = i.private_7 + 1; //private role for 7 days, 
 				let e = i.elite + 1; //elite role for 7 days
 				//console.log(gifted) //remove this when released, just watching the behavior of pseudo randomness
 				//idea: по возможности можно очень сильно оптимизировать, мб функцией, главное не срать
@@ -352,7 +353,7 @@ client.on('message', message => {
 	if(command === 'инвентарь') {
 		pool.query(`SELECT * FROM users WHERE id = '${message.author.id}'`, (err, rows) => {
 			if(!rows[0]) return message.channel.send(error("У вас еще нет аккаунта"));
-			let inv = JSON.parse(rows[0].inventory);
+			let inv = JSON.parse(JSON.stringify(rows[0].inventory));
 			const embed = new Discord.RichEmbed()
 			.setTitle("Инвентарь пользователя "+message.author.username)
 			.addField("Личная роль на 3 дня", inv.private_3)
@@ -441,7 +442,7 @@ client.on('message', message => {
 		if(!huged) return message.channel.send(error("Для этой команды нужно упомянуть человека"));
 		pool.query(`SELECT * FROM users WHERE id = '${huged.id}'`, (err, rows) => {
 			if(!rows[0]) return message.channel.send(error("Для этой команды нужен активный профиль второго пользователя"));
-			let uses = JSON.parse(rows[0].uses);
+			let uses = JSON.parse(JSON.stringify(rows[0].uses));
 			let neww = uses.hug+1; // ++ .-.
 			pool.query(`UPDATE users SET uses = JSON_SET(uses, "$.hug", ${neww})`); //use this query for REACTION EDITS REEEEEEEEEEEEEEEEEEEEEEE
 		})
