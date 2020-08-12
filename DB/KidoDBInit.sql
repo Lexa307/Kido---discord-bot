@@ -15,12 +15,13 @@ create table if not exists users (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 create table if not exists shop (
+	`id` varchar(255),-- role id copy from server options 
 	`itemid` int auto_increment,
 	`item` varchar(255) not null,
     `price` int not null,
     PRIMARY KEY (`itemid`)
     )ENGINE=InnoDB DEFAULT CHARSET=utf8;
-insert into shop(item, price) values('elite',255);
-insert into shop(item, price) values('private_3',50);
-insert into shop(item, price) values('private_5',70);
-insert into shop(item, price) values('private_7',100);
+insert into shop(id, item, price) values('742535740847685653', 'elite',255);
+insert into shop(id, item, price) values('743042973511581707', 'private_3',50);
+-- insert into shop(item, price) values('private_5',70);
+-- insert into shop(item, price) values('private_7',100);
