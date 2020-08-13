@@ -1,4 +1,5 @@
-const pool = require('../index.js').pool;
+const {pool,client} = require('../index.js');
+const guildid = process.env.GUILD_ID;
 const error = require('./Error.js');
 let Buy = (message, args) => {
     pool.query(`SELECT * FROM users WHERE id = '${message.author.id}'`, (err, rows) => {
