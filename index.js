@@ -24,6 +24,8 @@ pool.getConnection(function(err) {//check for database connection
 		throw err; // not connected!
 	} 
 });
+module.exports = {pool:pool,client:client};
+
 // FUNCTIONS
 client.on('ready', () => {
 	console.log("Ready");
@@ -32,7 +34,7 @@ client.on('ready', () => {
 	function randomStatus() {
 	let stars = 0;
 	let gifts = 0;
-	pool.query(`SELECT * FROM users`, (err, rows) => {
+	pool.query(`SELECT money,gifts FROM users`, (err, rows) => {
 		rows.forEach(row => {
 			stars = stars + row.money;
 			gifts = gifts + row.gifts;
@@ -43,7 +45,7 @@ client.on('ready', () => {
         client.user.setActivity(status[rstatus], {type: 'STREAMING', url: 'https://twitch.tv/.'});
     }; setInterval(randomStatus, 60000)
 
-	pool.query(`SELECT * FROM users`, (err, rows) => {
+	pool.query(`SELECT private FROM users`, (err, rows) => {
 		if(!rows) return;
 		rows.forEach(row => {
 			if(!row) return;
@@ -60,7 +62,7 @@ client.on('ready', () => {
 	})
 
 	setInterval( () => {
-		 pool.query(`SELECT * FROM users`, (err, rows) => {
+		 pool.query(`SELECT id,private FROM users`, (err, rows) => {
                 rows.forEach(row => {
                         if(!row) return;
                         if(row.private === null) return;
@@ -87,17 +89,17 @@ client.on('voiceStateUpdate', (old, member) => {
 		if(member.selfMute === true) return; //ignore if muted himself;
 		if(old.voiceChannelID === member.voiceChannelID) return; //ignore this channel updates - anti layering voice recording;
 		voice[member.user.id] = setInterval( () => {
-			pool.query(`SELECT * FROM users WHERE id = '${member.user.id}'`, (err, rows) => {
+			pool.query(`SELECT voicem,voiceh,gifts FROM users WHERE id = '${member.user.id}' LIMIT 1`, (err, rows) => {
 				if(!rows[0]) return; //ignore in not exits;
 				//record 1 voice minute;
-				pool.query(`UPDATE users SET voicem = ${rows[0].voicem + 1} WHERE id = '${member.user.id}'`);
+				pool.query(`UPDATE users SET voicem = ${rows[0].voicem + 1} WHERE id = '${member.user.id}' LIMIT 1`);
 				if(rows[0].voicem >= 60) {
 				//record 1 voice hour, set voice minutes to 00;
 					 pool.query(`UPDATE users SET voiceh = ${rows[0].voiceh + 1}, voicem = 0 WHERE id = '${member.user.id}'`);
 					 if(rows[0].voiceh == 11) {
                                 	//Every 12 hours member will get 1 gift;
                                 	//Gift can drop a private role for 3/5/7 days | premium role for 7 days | 100-200 server currency;
-                               	         	pool.query(`UPDATE users SET gifts = ${rows[0].gifts + 1} WHERE id = '${member.user.id}'`);
+                               	         	pool.query(`UPDATE users SET gifts = ${rows[0].gifts + 1} WHERE id = '${member.user.id}' LIMIT 1`);
 						member.user.send("Вы получили 1 🎁 за то что просидели в войсе более 12 часов!");
                                 	}
 				}
@@ -126,5 +128,5 @@ client.on('message', message => {
 		case "обнять": require('./commands/Hug.js')(message); break;
 	}
 })//допилить действия с игроками
-module.exports = {pool:pool,client:client};
+
 client.login(process.env.TOKEN);

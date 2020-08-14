@@ -2,7 +2,7 @@ const pool = require('../index.js').pool;
 const Discord = require(`discord.js`);
 const error = require('./Error.js');
 let ShowInventory = message =>{
-    pool.query(`SELECT * FROM users WHERE id = '${message.author.id}'`, (err, rows) => {
+    pool.query(`SELECT inventory,gifts,money FROM users WHERE id = '${message.author.id}' LIMIT 1`, (err, rows) => {
         if(!rows[0]) return message.channel.send(error("У вас еще нет аккаунта"));
         let inv = JSON.parse(JSON.stringify(rows[0].inventory));
         const embed = new Discord.RichEmbed()

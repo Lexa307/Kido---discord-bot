@@ -2,7 +2,7 @@ const {pool,client} = require('../index.js');
 const guildid = process.env.GUILD_ID;
 const error = require('./Error.js');
 let Buy = (message, args) => {
-    pool.query(`SELECT * FROM users WHERE id = '${message.author.id}'`, (err, rows) => {
+    pool.query(`SELECT money FROM users WHERE id = '${message.author.id}' LIMIT 1`, (err, rows) => {
         if(!rows[0]) return message.channel.send(error("У вас еще нет аккаунта"));
         let item = args.join(" ");
         if(!item) return message.channel.send(error("Не указана роль для покупки"));

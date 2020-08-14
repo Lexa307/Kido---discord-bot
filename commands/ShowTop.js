@@ -1,7 +1,7 @@
 const {pool,client} = require('../index.js');
 const Discord = require(`discord.js`);
 let ShowTop = message => {
-    pool.query(`SELECT * FROM users ORDER BY money DESC LIMIT 10`, (err, rows) => {
+    pool.query(`SELECT id,money FROM users ORDER BY money DESC LIMIT 10`, (err, rows) => {
         const embed = new Discord.RichEmbed();
         embed.setTitle(":crown: Топ 10 богачей сервера")
         embed.setColor('GOLD')

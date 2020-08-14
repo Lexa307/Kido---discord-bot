@@ -3,7 +3,7 @@ const error = require('./Error.js');
 let USeItem = (message, args) =>{
     let item = args.join(" ");
     if(!item) return message.channel.send(error("Не указан предмет для использования"));
-    pool.query(`SELECT * FROM users WHERE id = '${message.author.id}'`, (err, rows) => {
+    pool.query(`SELECT inventory FROM users WHERE id = '${message.author.id}' LIMIT 1`, (err, rows) => {
         pool.query(`select * from shop`,(err,rows2) =>{
             let ItemID = rows2.find(Item =>{return (Item.item == item) });
             console.log(ItemID);

@@ -9,7 +9,7 @@ let ShowProfile = (message,args)=>{
         else member = (args[1])?args[1]:args[0]
     if(!args[0]) member = message.author.id;
     
-    pool.query(`SELECT * FROM users WHERE id = ${member}`, (err, rows) => {
+    pool.query(`SELECT voicem,voiceh,uses,id,description,money,gifts FROM users WHERE id = ${member} LIMIT 1`, (err, rows) => {
         if(!rows[0]) return;
         
         let time_m = (rows[0].voicem == null)? 0 :rows[0].voicem;
