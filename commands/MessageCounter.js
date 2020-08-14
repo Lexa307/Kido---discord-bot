@@ -5,7 +5,7 @@ let CountMessages = (message)=>{
 		if(!rows[0]) 
 			pool.query(`call add_user(${message.author.id})`);// register user;
 		else //increment message counts of user
-			pool.query(`UPDATE users SET  messages = ${rows[0].messages++} WHERE id = ${message.author.id} LIMIT 1`);
+			pool.query(`UPDATE users SET  messages = ${rows[0].messages + 1} WHERE id = ${message.author.id} LIMIT 1`);
 	})
 }
 module.exports = CountMessages;
