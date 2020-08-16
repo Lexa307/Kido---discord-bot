@@ -1,5 +1,5 @@
 const pool = require('../index').pool;
-const error = require('./Error.js');
+const error = require('../runtime/Error');
 let Hug = message => {
     let huged = message.mentions.users.first();
 		if(!huged) return message.channel.send(error("Для этой команды нужно упомянуть человека"));
@@ -9,4 +9,10 @@ let Hug = message => {
 			pool.query(`UPDATE users SET uses = JSON_SET(uses, "$.hug", ${uses.hug + 1}) where id = ${huged.id} LIMIT 1`); //use this query for REACTION EDITS REEEEEEEEEEEEEEEEEEEEEEE
 		})
 }
-module.exports = Hug;
+module.exports =
+{
+    name: "обнять",
+    usage: function (){return `${process.env.PREFIX}${this.name} (@someone)`},
+    desc: "Обнимашки с участником сервера, жаль что в жизни их так мало",
+    func: Hug
+}

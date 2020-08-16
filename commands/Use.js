@@ -1,6 +1,6 @@
 const pool = require('../index.js').pool;
-const error = require('./Error.js');
-let USeItem = (message, args) =>{
+const error = require('../runtime/Error');
+let USeItem = (message, args, client ) =>{
     let item = args.join(" ");
     if(!item) return message.channel.send(error("Не указан предмет для использования"));
     pool.query(`SELECT inventory FROM users WHERE id = '${message.author.id}' LIMIT 1`, (err, rows) => {
@@ -18,4 +18,10 @@ let USeItem = (message, args) =>{
         })
     });
 }
-module.exports = USeItem;
+module.exports =
+{
+    name: "использовать",
+    usage: function (){return `${process.env.PREFIX}${this.name} (inventory_item)`},
+    desc: "Использование предмета вашего инвентаря",
+    func: USeItem
+}

@@ -75,4 +75,10 @@ let CreateEbedMessage = (message,args) =>{
         console.error(e);
     }
 }
-module.exports = CreateEbedMessage;
+module.exports = 
+{
+    name: "embed",
+    usage: function (){return `${process.env.PREFIX}${this.name} (embed_options)`},
+    desc: "Создание кастомных сообщений с возможностью вставки различных полей",
+    func: CreateEbedMessage
+}

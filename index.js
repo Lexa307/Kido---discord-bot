@@ -1,12 +1,33 @@
 const Discord = require(`discord.js`);
 const mysql   = require("mysql2");
 require('dotenv').config();
+const fs = require('fs');
+const BotCommands = [];
 const moment  = require("moment");
 const client  = new Discord.Client();
 const guildid = process.env.GUILD_ID;
 const prefix  = process.env.PREFIX;
 const MainTeextChannelID = process.env.MAIN_CHANNEL_ID;//can ve deleted at next commits
 moment.locale("ru");
+BotCommands.push(
+	{
+		name: "помощь",
+		usage: function (){return `${process.env.PREFIX}${this.name}`},
+		desc: "Показывает какие команды имеются у бота",
+		func: function(message){
+			const helpEmbed = new Discord.RichEmbed()
+				.setTitle("Команды бота")
+				.setColor('#0099ff');
+			for(let i of BotCommands){
+				helpEmbed.addField(i.usage(), i.desc, false);
+			}
+			message.channel.send(helpEmbed);
+		}
+	})
+	fs.readdir(`${__dirname}/commands`,(err,file)=>{
+		for(let i of file) BotCommands.push(require(`./commands/${i}`))
+		console.log(BotCommands);
+	})
 const voice = { };
 
 const pool = mysql.createPool({
@@ -95,7 +116,7 @@ client.on('voiceStateUpdate', (old, member) => {
 				pool.query(`UPDATE users SET voicem = ${rows[0].voicem + 1} WHERE id = '${member.user.id}' LIMIT 1`);
 				if(rows[0].voicem >= 60) {
 				//record 1 voice hour, set voice minutes to 00;
-					 pool.query(`UPDATE users SET voiceh = ${rows[0].voiceh + 1}, voicem = 0 WHERE id = '${member.user.id}'`);
+					 pool.query(`UPDATE users SET voiceh = ${rows[0].voiceh + 1}, voicem = 0 WHERE id = '${member.user.id}' LIMIT 1`);
 					 if(rows[0].voiceh == 11) {
                                 	//Every 12 hours member will get 1 gift;
                                 	//Gift can drop a private role for 3/5/7 days | premium role for 7 days | 100-200 server currency;
@@ -104,29 +125,18 @@ client.on('voiceStateUpdate', (old, member) => {
                                 	}
 				}
 			})
-		}, 4000)
+		}, 60000)
 	}
 })
 
 client.on('message', message => {
-	require('./commands/MessageCounter.js')(message); // UPDATE OR REGISTER USER PROFILE
-	require('./commands/Ping')(message); //Bot answer if someone mentioned him
+	require('./runtime/MessageCounter')(message); // UPDATE OR REGISTER USER PROFILE
+	require('./runtime/Ping')(message); //Bot answer if someone mentioned him
 	const args = message.content.slice(prefix.length).trim().split(/ +/g);
 	const command = args.shift().toLowerCase();
-	switch(command){
-		case "embed": require('./commands/Embed.js')(message,args); break;
-		case "статус": require('./commands/SetStatus')(message,args); break;
-		case "профиль": require('./commands/Profile.js')(message,args); break;
-		case "топ": require('./commands/ShowTop.js')(message); break;
-		case "открыть": require('./commands/Open.js')(message); break;
-		case "инвентарь": require('./commands/Inventory.js')(message); break;
-		case "роли": require('./commands/ShowRole.js')(message); break;
-		case "магазин": require('./commands/Shop.js')(message); break;
-		case "купить": require('./commands/Buy.js')(message, args); break;
-		case "использовать": require('./commands/Use.js')(message, args); break;
-		//REACTIONS
-		case "обнять": require('./commands/Hug.js')(message); break;
-	}
+	let cmd = BotCommands.find(botcommand => { return (botcommand.name === command)});
+	if(cmd) cmd.func(message,args,client);
+
 })//допилить действия с игроками
 
 client.login(process.env.TOKEN);

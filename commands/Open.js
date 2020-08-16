@@ -1,5 +1,5 @@
 const pool = require('../index').pool;
-const error = require('./Error.js');
+const error = require('../runtime/Error');
 const random = function(min, max) {
 	return Math.floor(min + Math.random() * (max + 1 - min));
 }
@@ -27,4 +27,10 @@ let Open = message => {
         message.channel.send("Открываем коробку..").then( message.channel.send(response) );
     })
 }
-module.exports = Open;
+module.exports =
+{
+    name: "открыть",
+    usage: function (){return `${process.env.PREFIX}${this.name}`},
+    desc: "Открывает подарок, если он у вас есть",
+    func: Open
+}

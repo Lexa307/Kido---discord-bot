@@ -1,7 +1,7 @@
 const pool = require('../index.js').pool;
-const error = require('./Error.js');
+const error = require('../runtime/Error');
 const Discord = require(`discord.js`);
-let ShowRole = message => {
+let ShowRole = (message, args, client ) => {
     pool.query(`SELECT private FROM users WHERE id = '${message.author.id}' LIMIT 1`, (err, rows) =>{
         if(!rows[0]) return message.channel.send(error("Вы еще не зарегистрированы"));
         let roles = JSON.parse(rows[0].private);
@@ -16,4 +16,10 @@ let ShowRole = message => {
         message.channel.send(embed)
     })
 }
-module.exports = ShowRole;
+module.exports =
+{
+    name: "роли",
+    usage: function (){return `${process.env.PREFIX}${this.name}`},
+    desc: "Показывает ваши личные роли",
+    func: ShowRole
+}

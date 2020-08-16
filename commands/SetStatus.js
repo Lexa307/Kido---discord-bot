@@ -2,7 +2,7 @@ const pool = require('../index.js').pool;
 const clear = function(str) {
     return str.replace(/(['`', "`"])/g, "\\$1")
 }
-const error = require('./Error.js');
+const error = require('../runtime/Error');
 let SetStatus = (message,args)=>{
     pool.query(`SELECT id FROM users WHERE id = ${message.author.id} LIMIT 1`, (err, rows) => {
         if(!rows[0]) return message.channel.send(err("Аккаунт не найден"));
@@ -14,4 +14,10 @@ let SetStatus = (message,args)=>{
         message.delete();
     })
 }
-module.exports = SetStatus;
+module.exports =
+{
+    name: "статус",
+    usage: function (){return `${process.env.PREFIX}${this.name} (satus)`},
+    desc: "Устанавливает личный статус в вашем профиле",
+    func: SetStatus
+}

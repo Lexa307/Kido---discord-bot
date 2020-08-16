@@ -1,15 +1,15 @@
-const {pool,client} = require('../index.js');
+const {pool} = require('../index.js');
 const Discord = require(`discord.js`);
 const price   = process.env.PRICE;
 const moment  = require("moment");
-let ShowProfile = (message,args)=>{
+let ShowProfile = (message, args, client)=>{
     let ids = message.mentions.members.first();
     let member; 
     if (ids) member = ids.user.id;
         else member = (args[1])?args[1]:args[0]
     if(!args[0]) member = message.author.id;
     
-    pool.query(`SELECT voicem,voiceh,uses,id,description,money,gifts FROM users WHERE id = ${member} LIMIT 1`, (err, rows) => {
+    pool.query(`SELECT voicem,voiceh,uses,id,description,money,gifts,messages FROM users WHERE id = ${member} LIMIT 1`, (err, rows) => {
         if(!rows[0]) return;
         
         let time_m = (rows[0].voicem == null)? 0 :rows[0].voicem;
@@ -48,4 +48,10 @@ let ShowProfile = (message,args)=>{
     message.delete();
 		})
 }
-module.exports = ShowProfile
+module.exports =
+{
+    name: "профиль",
+    usage: function (){return `${process.env.PREFIX}${this.name} [@someone]`},
+    desc: "Показывает профиль участника",
+    func: ShowProfile
+}

@@ -1,7 +1,7 @@
 const Discord = require(`discord.js`);
-const {pool,client} = require('../index.js');
+const {pool} = require('../index.js');
 const guildid = process.env.GUILD_ID;
-let ShowShop = message => {
+let ShowShop = (message, args, client ) => {
     const embed = new Discord.RichEmbed()
 		.setTitle("Магазин ролей")
 		.setColor("#3212A0")
@@ -14,4 +14,10 @@ let ShowShop = message => {
 		message.channel.send(embed)
 		});
 }
-module.exports = ShowShop;
+module.exports =
+{
+    name: "магазин",
+    usage: function (){return `${process.env.PREFIX}${this.name}`},
+    desc: "Смотрим что есть в магазине",
+    func: ShowShop
+}
