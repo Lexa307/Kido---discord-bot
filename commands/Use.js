@@ -1,4 +1,4 @@
-const pool = require('../index.js').pool;
+const pool = require('../DB/db');
 const error = require('../runtime/Error');
 let USeItem = (message, args, client ) =>{
     let item = args.join(" ");

@@ -1,4 +1,4 @@
-const pool = require('../index.js').pool;
+const pool = require('../DB/db');
 const clear = function(str) {
     return str.replace(/(['`', "`"])/g, "\\$1")
 }

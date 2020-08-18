@@ -1,4 +1,4 @@
-const pool = require('../index').pool;
+const pool = require('../DB/db');
 const error = require('../runtime/Error');
 const random = function(min, max) {
 	return Math.floor(min + Math.random() * (max + 1 - min));

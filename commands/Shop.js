@@ -1,5 +1,5 @@
 const Discord = require(`discord.js`);
-const {pool} = require('../index.js');
+const pool = require('../DB/db');
 const guildid = process.env.GUILD_ID;
 let ShowShop = (message, args, client ) => {
     const embed = new Discord.RichEmbed()

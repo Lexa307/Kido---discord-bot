@@ -1,4 +1,4 @@
-const {pool} = require('../index.js');
+const pool = require('../DB/db');
 const guildid = process.env.GUILD_ID;
 const error = require('../runtime/Error');
 const price = process.env.PRICE;

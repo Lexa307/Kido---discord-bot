@@ -1,4 +1,4 @@
-const pool = require('../index.js').pool;
+const pool = require('../DB/db');
 const error = require('../runtime/Error');
 const Discord = require(`discord.js`);
 let ShowRole = (message, args, client ) => {

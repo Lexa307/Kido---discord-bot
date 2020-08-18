@@ -1,4 +1,4 @@
-const {pool} = require('../index.js');
+const pool = require('../DB/db');
 const Discord = require(`discord.js`);
 const Price = process.env.PRICE;
 let ShowTop = (message, args, client ) => {

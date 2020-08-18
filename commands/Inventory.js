@@ -1,4 +1,4 @@
-const pool = require('../index.js').pool;
+const pool = require('../DB/db');
 const Discord = require(`discord.js`);
 const error = require('../runtime/Error');
 let ShowInventory = message =>{

@@ -1,4 +1,4 @@
-const pool = require('../index').pool;
+const pool = require('../DB/db');
 const error = require('../runtime/Error');
 let Hug = message => {
     let huged = message.mentions.users.first();
