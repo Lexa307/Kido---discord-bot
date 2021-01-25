@@ -14,21 +14,29 @@ create table if not exists kidoDB.users (
    PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-create table if not exists kidoDB.shop ( -- shop of ability setup private role
-	`id` varchar(255),
-	`itemid` int auto_increment,
-	`item` varchar(255) not null,
-    `price` int not null,
-    `description` varchar(255), 
-    PRIMARY KEY (`itemid`)
+create table if not exists kidoDB.item ( -- shop of ability setup private role
+	`id` int auto_increment,
+    `type` varchar(30) not null,
+	`name` varchar(255) not null,
+    `description` varchar(255) not null,
+    `value` VARCHAR (255) DEFAULT NULL, 
+    `onUse` VARCHAR (255) DEFAULT NULL, 
+    PRIMARY KEY (`id`), INDEX (`name`)
     )ENGINE=InnoDB DEFAULT CHARSET=utf8;
-insert into shop(id, item, price) values('742535740847685653', 'elite',255);
-insert into shop(id, item, price) values('743042973511581707', 'private_3',50);
--- insert into shop(item, price) values('private_5',70);
--- insert into shop(item, price) values('private_7',100);
+
+create table if not exists kidoDB.shop ( -- shop of ability setup private role
+	`itemid` int not null,
+    `price` int not null,
+    FOREIGN KEY (`itemid`)
+    REFERENCES kidoDB.item (`id`) ON DELETE CASCADE
+    )ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
 DELIMITER $$
 CREATE PROCEDURE add_user(in userid VARCHAR(255) )
 BEGIN
-    INSERT INTO users (id, uses, inventory) VALUES (userid, '{"hug": 0, "kiss": 0, "bite": 0, "pat": 0, "smoke": 0, "beer": 0, "rip": 0, "shot": 0, "poke": 0, "slap": 0, "lick": 0, "coffee": 0, "sad": 0, "sex": 0 }','{"elite": 0, "private_3": 0,"private_5": 0, "private_7": 0}');
+    INSERT INTO users (id, uses, inventory, private) VALUES (userid, '{"hug": 0, "kiss": 0, "bite": 0, "pat": 0, "smoke": 0, "beer": 0, "rip": 0, "shot": 0, "poke": 0, "slap": 0, "lick": 0, "coffee": 0, "sad": 0, "sex": 0 }','{}','{}');
 END $$
-DELIMITER ; 
+DELIMITER ;
+
+insert into item(type, name, description, value) values('role', 'elite', 'Элитная роль сервера', '742535740847685653');
+insert into shop(itemid, price) values(1, 250);

@@ -1,16 +1,16 @@
 const Discord = require('discord.js');
 const pool = require('../DB/db');
 
-const guildid = process.env.GUILD_ID;
-const ShowShop = (message, args, client) => {
+const { PRICE } = process.env;
+const ShowShop = (message) => {
   const embed = new Discord.RichEmbed()
-    .setTitle('Магазин ролей')
+    .setTitle('Магазин сервера')
     .setColor('#3212A0');
-  pool.query('SELECT * FROM shop', (err, rows) => {
-    if (!rows[0]) embed.setDescription('Ролей нет.');
+  pool.query('SELECT id, name, type, description, (SELECT price from shop WHERE item.id = itemid) as price FROM item;', (err, rows) => {
+    if (!rows[0]) embed.setDescription('В магазине пока ничего нет!');
     for (let i = 0; i < rows.length; i++) {
       const row = rows[i];
-      embed.addField(`[ ${row.itemid} ] ${row.item}`, `Цена: ${row.price}\nВы получите роль ${client.guilds.get(guildid).roles.get(row.id).name}`);
+      embed.addField(`[ ${row.id} ] ${row.name}`, ` Тип: **${row.type}** \n Цена: **${row.price}** ${PRICE}\n Описание: **${row.description}**`);
     }
     message.channel.send(embed);
   });

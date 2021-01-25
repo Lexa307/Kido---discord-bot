@@ -7,6 +7,8 @@ const pinganswers = [
   'при первой же возможности я тебя забаню!',
   'ты меня злишь!'];
 const PingAnswer = (message) => {
-  if (message.content.indexOf('<@!566415015519846422>') >= 0) message.reply(pinganswers[Math.floor(Math.random() * (pinganswers.length))]);//
+  if (message.content.indexOf('<@!566415015519846422>') >= 0) {
+    message.reply(pinganswers[Math.floor(Math.random() * (pinganswers.length))]);//
+  } 
 };
 module.exports = PingAnswer;

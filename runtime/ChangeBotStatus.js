@@ -1,16 +1,11 @@
 const pool = require('../DB/db');
+const { PRICE } = process.env;
 
 const RandomStatus = (client) => {
-  let stars = 0;
-  let gifts = 0;
-  pool.query('SELECT money,gifts FROM users', (err, rows) => {
-    rows.forEach((row) => {
-      stars += row.money;
-      gifts += row.gifts;
-    });
+  pool.query('SELECT SUM(money) as money, SUM (gifts) as gifts FROM users;', (err, row) => {
+    const status = [`орбиту 🌍 | ${row[0].money} ${PRICE}`, `орбиту 🌍 | ${row[0].gifts} 🎁`];
+    const rstatus = Math.floor(Math.random() * status.length);
+    client.user.setActivity(status[rstatus], { type: 'STREAMING', url: 'https://twitch.tv/.' });
   });
-  const status = [`орбиту 🌍 | ${stars} 🌟`, `орбиту 🌍 | ${gifts} 🎁`];
-  const rstatus = Math.floor(Math.random() * status.length);
-  client.user.setActivity(status[rstatus], { type: 'STREAMING', url: 'https://twitch.tv/.' });
 };
 module.exports = RandomStatus;
